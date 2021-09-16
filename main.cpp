@@ -13,7 +13,7 @@ using std::vector;
 using std::abs;
 
 //state of the cells in the grid 
-enum class State {kEmpty, kObstacle, kClosed, kStart, kFinish};
+enum class State {kEmpty, kObstacle, kClosed, kPath, kStart, kFinish};
 
 
 vector<State> ParseLine(string line) {
@@ -74,6 +74,12 @@ bool CheckValidCell (int x, int y, vector<vector<State>> &grid){
   }
 }
 
+// AddToOpen function
+void AddToOpen(int x, int y, int g, int h, vector<vector<int>> &openNode, vector<vector<State>> &grid){
+    // Add node to open vector, and mark grid cell as closed.
+    openNode.push_back(vector<int>{x, y, g, h});
+    grid[x][y] = State::kClosed;
+}
 
 // directional deltas
 const int delta[4][2]{{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
@@ -98,15 +104,6 @@ void ExpandNeighbors(const vector<int> &currentNode, int goal[2], vector<vector<
     }
   }
 }
-
-
-// AddToOpen function
-void AddToOpen(int x, int y, int g, int h, vector<vector<int>> &openNode, vector<vector<State>> &grid){
-    // Add node to open vector, and mark grid cell as closed.
-    openNode.push_back(vector<int>{x, y, g, h});
-    grid[x][y] = State::kClosed;
-}
-
 
 //Implementation of A* search algorithm
  
@@ -135,10 +132,12 @@ vector<vector<State>> Search (vector<vector<State>> grid, int origin [2], int go
 
       //Check if you've reached the goal. If so, return grid.
       if (x==goal[0] && y==goal[1]){
+        grid[origin[0]][origin[1]] = State::kStart;
+        grid[goal[0]][goal[1]] = State::kFinish;
         return grid;
       }
       // Expand search to current node's neighbors
-      ExpandNeighbors(current, goal, open, grid);
+      ExpandNeighbors(currentNode, goal, open, grid);
     }
     
   // Ran out of new nodes to explore and haven't found a path.
@@ -170,11 +169,11 @@ void PrintBoard(const vector<vector<State>> board) {
 
 int main() {
   // Declare "init" and "goal" arrays with values {0, 0} and {4, 5} respectively.
-  int init[2]={0,0};
+  int origin[2]={0,0};
   int goal[2]={4,5};
   auto board = ReadBoardFile("1.board");
   // Call Search with "board", "init", and "goal". Store the results in the variable "solution".
-  vector<vector<State>> solution = Search(board, init, goal);
+  vector<vector<State>> solution = Search(board, origin, goal);
   // Pass "solution" to PrintBoard.
   PrintBoard(solution);
 }
