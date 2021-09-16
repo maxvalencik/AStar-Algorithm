@@ -3,6 +3,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm> 
+using std::sort;
 using std::cout;
 using std::ifstream;
 using std::istringstream;
@@ -85,28 +87,25 @@ vector<vector<State>> Search (vector<vector<State>> grid, int origin [2], int go
     AddToOpen(x,y,g,h,open, grid);
 
     //while open vector is non empty
-  while (!open.empty()){
-   //Sort the open list using CellSort, and get the current node. 
-    CellSort(open); //sort the vectors in open by f-value...fist vector has lowest f value. CellSort function directly modifies open (*v)
-    int x = open[0][0]; //x of first node in open which has the lowest f value
-    int y = open[0][1]; //y of first node in open which has the lowest f value
-    //set grid[x][y] to kPath
-    grid [x][y] = state::kPath;
+    while (!open.empty()){
+    //Sort the open list using CellSort, and get the current node. 
+      CellSort(&open); //sort open in descending values
+      auto currentNode=open.back();//latest element of open (x,y,g,h)
+      open.pop_back(); //remove node from open
+      int x = currentNode[0];
+      int y = currentNode[1]; 
+      //set grid[x][y] to kPath
+      grid [x][y] = State::kPath;
 
-    
-  }
-   
-
-    // TODO: Check if you've reached the goal. If so, return grid.
-
-    
+      //Check if you've reached the goal. If so, return grid.
+      if (x==goal[0] && y==goal[1]){
+        return grid;
+      }
+    }
     // If we're not done, expand search to current node's neighbors. This step will be completed in a later quiz.
     // ExpandNeighbors
   
-  //} // TODO: End while loop
-  
-  // We've run out of new nodes to explore and haven't found a path.
-
+  // Ran out of new nodes to explore and haven't found a path.
     cout << "No path found!" << "\n";
     return {};
 }
